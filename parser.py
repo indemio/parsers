@@ -46,12 +46,27 @@ def parser(xmlFile, conn):
                         uin = atribut.text
 
             parse_list.append(contract)
-    sql_param1=('?,'*len(parse_list[0]))[:-1]
-    #print(sql_param1)
+    sql_param1=list()
+    sql_param2 = list()
+    sql_param3 = list()
+    sql_param4 = list()
+
+    # for dop in tupol['ДополнительнаяИнформация']:
+    #     #sql_param1.append(dop)
+    #     print(dop.)
+    # for kon in tupol['Контакты']:
+    # #     sql_param2.append(kon)
+    #      print(sql_param2)
+    # #print(sql_param1)
+    ind=0
+    for ind in tupol['ДополнительнаяИнформация'].index(0):
+        ind=ind+1
+        print(tupol.values())
     try:
         sql = 'INSERT OR REPLACE INTO {0} VALUES ({1})'
-        cur.execute(sql.format('tempTab' ,  ('?,' * len(parse_list[0]))[:-1]), parse_list)
-        cur.execute(sql.format('tempTab2', ('?,' * len(tupol['ДополнительнаяИнформация']))[:-1]), tupol['ДополнительнаяИнформация'])
+        cur.execute(sql.format('tempTab',  ('?,' * len(parse_list[0]))[:-1]), parse_list[0])
+        #for dop in tupol['ДополнительнаяИнформация']:
+        cur.executemany(sql.format('tempTab2', ('?,' * len(tupol['ДополнительнаяИнформация']))[:-1]), tupol.items()['ДополнительнаяИнформация'])
         cur.execute(sql.format('tempTab3', ('?,' * len(tupol['Контакты']))[:-1]), tupol['Контакты'])
         cur.execute(sql.format('tempTab4', ('?,' * len(tupol['ЮридическийАдрес']))[:-1]), tupol['ЮридическийАдрес'])
         cur.execute(sql.format('tempTab5', ('?,' * len(tupol['ПочтовыйАдрес']))[:-1]), tupol['ПочтовыйАдрес'])
@@ -84,9 +99,9 @@ def parser(xmlFile, conn):
         #                   tupol['ПочтовыйАдрес'])
     except sqlite3.Error as error:
         print("Ошибка", error)
-    # print(parse_list[0])
+    print(parse_list[0])
     # print(parse_list[1])
-    # print(tupol['ДополнительнаяИнформация'])
+    print(tupol['ДополнительнаяИнформация'][0])
     # print(tupol['Контакты'])
     # print(tupol['ЮридическийАдрес'])
     # print(tupol['ПочтовыйАдрес'])
@@ -94,7 +109,7 @@ def parser(xmlFile, conn):
 
 def main():
     conn=connector("pythonsqlite.db")
-    parser("C:/temp/20200313-165646import.xml",conn)
+    parser("20200313-165646import.xml",conn)
     conn.commit()
     conn.close()
 main()

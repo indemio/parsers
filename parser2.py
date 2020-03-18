@@ -44,11 +44,11 @@ def parseXML(xml_file):
     tree = ElementTree.parse(xml_file)
     root = tree.getroot()
     xmldict=XmlDictConfig(root)
-    #print(xmldict)
+    print(xmldict)
 
 
 if __name__ == "__main__":
-    parseXML("example.xml")
+    parseXML("C:/temp/20200313-165646import.xml")
 
 
 

@@ -1,23 +1,29 @@
-import sqlite3
+#import sqlite3
 from xml.etree import cElementTree as ET
-from sqlite3 import Error
+#from sqlite3 import Error
 import cx_Oracle
 from cx_Oracle import Error
+import os
 
-try:
-    dsn_tns = cx_Oracle.makedsn('10.10.1.20', '1521', service_name='KGOK')
-    conn = cx_Oracle.connect(user=r'excel', password='q1w2e3', dsn=dsn_tns)
-except cx_Oracle.Error as error:
-        print("Соединение не установлено", error)
+
+os.environ['NLS_LANG'] = 'American_America.CL8MSWIN1251'
+
+# dsn_tns = cx_Oracle.makedsn('10.10.1.20', '1521', service_name='KGOK')
+# conn = cx_Oracle.connect(user=r'excel', password='q1w2e3', dsn=dsn_tns)
+# print("Соединение не установлено", error)
 cur = None
 
-def connector(database):
+
+def connector():
+    global cur
+
     conn = None
     try:
-        conn = sqlite3.connect(database)
-    except sqlite3.Error as error:
+        dsn_tns = cx_Oracle.makedsn('10.10.1.20', '1521', service_name='KGOK')
+        conn = cx_Oracle.connect(user=r'excel', password='q1w2e3', dsn=dsn_tns)
+    except cx_Oracle.Error as error:
         print("Соединение не установлено", error)
-
+    cur = conn.cursor()
     return conn
 
 
@@ -25,18 +31,20 @@ def InserDataSQL(NameTable, Data):
     if not len(Data):
         return
     try:
-        #sql_create='create table if not exists tempTab (UIN PRIMARY KEY, {0})'.format(Data.)
-        sql = 'INSERT OR REPLACE INTO {0} VALUES ({1})'.format(NameTable, ('?,' * len(Data[0]))[:-1])
+        for row in cur.execute("select * from "+NameTable):
+            print(row)
+        #sql_delete='create table if not exists tempTab (UIN PRIMARY KEY, {0})'.format(Data.)
+
+        cur.execute('delete from '+NameTable)
+
+        sql = 'INSERT INTO {0} VALUES (:{1})'.format(NameTable, ',:'.join(map(str, range(1, len(Data[0])+1))))
         #cur.excutemany(sql_create, Data)
         cur.executemany(sql, Data)
-    except sqlite3.Error as error:
+    except cx_Oracle.Error as error:
         print("Ошибка", error)
 
 
 def parser(xmlFile, conn):
-    global cur
-
-    cur = conn.cursor()
     tree=ET.parse(xmlFile)
     root=tree.getroot()
     parse_list=list()
@@ -71,17 +79,17 @@ def parser(xmlFile, conn):
                         uin = atribut.text
 
             parse_list.append(contract)
-    for key, value in tupol.items():
-        print(key)
-    InserDataSQL('tempTab' , parse_list)
-    InserDataSQL('tempTab2', tupol['ДополнительнаяИнформация'])
-    InserDataSQL('tempTab3', tupol['Контакты'])
-    InserDataSQL('tempTab4', tupol['ЮридическийАдрес'])
-    InserDataSQL('tempTab5', tupol['ПочтовыйАдрес'])
+    # for key, value in tupol.items():
+    #     print(key)
+    InserDataSQL('SRNT_ERP_AGNLIST' , parse_list)
+    InserDataSQL('SRNT_ERP_AGNLIST_DOPINFO', tupol['ДополнительнаяИнформация'])
+    InserDataSQL('SRNT_ERP_AGNLIST_PHONE', tupol['Контакты'])
+    InserDataSQL('SRNT_ERP_AGNLIST_JURADR', tupol['ЮридическийАдрес'])
+    InserDataSQL('SRNT_ERP_AGNLIST_POSTADR', tupol['ПочтовыйАдрес'])
 
 
 def main():
-    conn=connector("pythonsqlite.db")
+    conn=connector()
     parser("20200313-165646import.xml",conn)
     conn.commit()
     conn.close()

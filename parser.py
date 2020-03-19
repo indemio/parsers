@@ -1,7 +1,15 @@
 import sqlite3
 from xml.etree import cElementTree as ET
 from sqlite3 import Error
+import cx_Oracle
+from cx_Oracle import Error
 
+try:
+    dsn_tns = cx_Oracle.makedsn('10.10.1.20', '1521', service_name='KGOK')
+    conn = cx_Oracle.connect(user=r'excel', password='q1w2e3', dsn=dsn_tns)
+except cx_Oracle.Error as error:
+        print("Соединение не установлено", error)
+cur = None
 
 def connector(database):
     conn = None
@@ -13,20 +21,35 @@ def connector(database):
     return conn
 
 
+def InserDataSQL(NameTable, Data):
+    if not len(Data):
+        return
+    try:
+        #sql_create='create table if not exists tempTab (UIN PRIMARY KEY, {0})'.format(Data.)
+        sql = 'INSERT OR REPLACE INTO {0} VALUES ({1})'.format(NameTable, ('?,' * len(Data[0]))[:-1])
+        #cur.excutemany(sql_create, Data)
+        cur.executemany(sql, Data)
+    except sqlite3.Error as error:
+        print("Ошибка", error)
+
+
 def parser(xmlFile, conn):
+    global cur
+
     cur = conn.cursor()
     tree=ET.parse(xmlFile)
     root=tree.getroot()
     parse_list=list()
     tupol=dict()
+    ignore = ('ДополнительнаяИнформация', 'Контакты', 'ЮридическийАдрес', 'ПочтовыйАдрес')
     for child in root:
         for book in child:
             contract = list()
             uin = ''
             for atribut in book:
-                if len(atribut):
-                    tag=atribut.tag.replace('{http://www.mechel.corp/counterparties}','')
+                tag = atribut.tag.replace('{http://www.mechel.corp/counterparties}', '')
 
+                if len(atribut):
                     if tag in tupol:
                         value = tupol.pop(tag)
                     else:
@@ -40,71 +63,21 @@ def parser(xmlFile, conn):
 
                     value.append(dop_list)
                     tupol.update({tag: value})
+                elif tag in ignore:
+                    continue
                 else:
                     contract.append(atribut.text)
-                    if atribut.tag == '{http://www.mechel.corp/counterparties}УИН':
+                    if tag == 'УИН':
                         uin = atribut.text
 
             parse_list.append(contract)
-    sql_param1=list()
-    sql_param2 = list()
-    sql_param3 = list()
-    sql_param4 = list()
-
-    # for dop in tupol['ДополнительнаяИнформация']:
-    #     #sql_param1.append(dop)
-    #     print(dop.)
-    # for kon in tupol['Контакты']:
-    # #     sql_param2.append(kon)
-    #      print(sql_param2)
-    # #print(sql_param1)
-    ind=0
-    for ind in tupol['ДополнительнаяИнформация'].index(0):
-        ind=ind+1
-        print(tupol.values())
-    try:
-        sql = 'INSERT OR REPLACE INTO {0} VALUES ({1})'
-        cur.execute(sql.format('tempTab',  ('?,' * len(parse_list[0]))[:-1]), parse_list[0])
-        #for dop in tupol['ДополнительнаяИнформация']:
-        cur.executemany(sql.format('tempTab2', ('?,' * len(tupol['ДополнительнаяИнформация']))[:-1]), tupol.items()['ДополнительнаяИнформация'])
-        cur.execute(sql.format('tempTab3', ('?,' * len(tupol['Контакты']))[:-1]), tupol['Контакты'])
-        cur.execute(sql.format('tempTab4', ('?,' * len(tupol['ЮридическийАдрес']))[:-1]), tupol['ЮридическийАдрес'])
-        cur.execute(sql.format('tempTab5', ('?,' * len(tupol['ПочтовыйАдрес']))[:-1]), tupol['ПочтовыйАдрес'])
-
-        # sql = '''INSERT OR REPLACE INTO tempTab VALUES (
-        #     {0}
-        #     );
-        # INSERT OR REPLACE INTO tempTab2 VALUES (
-        #     {1}
-        #     );
-        # INSERT OR REPLACE INTO tempTab3 VALUES (
-        #     {2}
-        #     );
-        # INSERT OR REPLACE INTO tempTab4 VALUES (
-        #     {3}
-        #     );
-        # INSERT OR REPLACE INTO tempTab5 VALUES (
-        #     {4}
-        #     )
-        # '''.format(('?,'*len(parse_list[0]))[:-1],
-        #            ('?,'*len(tupol['ДополнительнаяИнформация']))[:-1],
-        #            ('?,'*len(tupol['Контакты']))[:-1],
-        #            ('?,'*len(tupol['ЮридическийАдрес']))[:-1],
-        #            ('?,'*len(tupol['ПочтовыйАдрес']))[:-1])
-        #
-        # cur.executescript(sql, parse_list,
-        #                   tupol['ДополнительнаяИнформация'],
-        #                   tupol['Контакты'],
-        #                   tupol['ЮридическийАдрес'],
-        #                   tupol['ПочтовыйАдрес'])
-    except sqlite3.Error as error:
-        print("Ошибка", error)
-    print(parse_list[0])
-    # print(parse_list[1])
-    print(tupol['ДополнительнаяИнформация'][0])
-    # print(tupol['Контакты'])
-    # print(tupol['ЮридическийАдрес'])
-    # print(tupol['ПочтовыйАдрес'])
+    for key, value in tupol.items():
+        print(key)
+    InserDataSQL('tempTab' , parse_list)
+    InserDataSQL('tempTab2', tupol['ДополнительнаяИнформация'])
+    InserDataSQL('tempTab3', tupol['Контакты'])
+    InserDataSQL('tempTab4', tupol['ЮридическийАдрес'])
+    InserDataSQL('tempTab5', tupol['ПочтовыйАдрес'])
 
 
 def main():

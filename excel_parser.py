@@ -17,42 +17,17 @@ def connector (db_name):
     return conn
 
 
-# def db_creator(NameTable, Data):
-#     try:
-#         sql1 = 'create table if not exists {0} ({1})'.format(NameTable, Data.columns)
-#         cur.executemany(sql, Data)
-#
-#     except sqlite3.Error as error:
-#         print("Таблица не создана", error)
-
-
-def InserDataSQL(conn, NameTable, Data):
-    cur=conn.cursor()
-    if not len(Data):
-        return
-    try:
-        # for row in cur.execute("select * from "+NameTable):
-        #     print(row)
-        cur.execute('create table if not exists {0} ({1})'.format(NameTable, Data.columns))
-        sql = 'INSERT OR REPLACE INTO {0} VALUES ({1})'.format(NameTable, ('?,' * len(Data.columns))[:-1])
-        cur.executemany(sql, Data)
-    except sqlite3.Error as error:
-        print("Ошибка", error)
-
-
 def parser(xlsx_file):
     conn = connector('xlsdb.db')
-    raw_data= pd.read_excel(xlsx_file, sheet_name='Лист1')
     tabname = os.path.splitext(xlsx_file)[0]
-    conn = connector('xlsdb.db')
-    #db_creator(tabname, raw_data)
-    InserDataSQL(conn, tabname, raw_data)
+    tabname=tabname.replace('(','')
+    tabname = tabname.replace(')', '')
+    raw_data= pd.read_excel(xlsx_file, sheet_name='Лист1')
+    raw_data.to_sql(name=tabname,con=conn,if_exists='replace')
     conn.commit()
     conn.close()
 
+
 def main():
-    parser("test.xlsx")
-    # conn=connector('xlsdb.db')
-    # conn.commit()
-    # conn.close()
+    parser("C:/Temp/Z_1C_(02052018-06052018)/Z_1C_(01052018).xlsx")
 main()

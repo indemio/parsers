@@ -36,6 +36,7 @@ class Ui_MainWindow(object):
         self.LoginEdit.setObjectName("LoginEdit")
         self.verticalLayout_3.addWidget(self.LoginEdit)
         self.PasswordEdit = QtWidgets.QLineEdit(self.groupBox)
+        self.PasswordEdit.setEchoMode(QtWidgets.QLineEdit.PasswordEchoOnEdit)
         self.PasswordEdit.setObjectName("PasswordEdit")
         self.verticalLayout_3.addWidget(self.PasswordEdit)
         self.verticalLayout_4.addWidget(self.groupBox)
@@ -62,6 +63,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
+        self.pushButton_2.clicked.connect(MainWindow.close)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

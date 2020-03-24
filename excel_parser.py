@@ -1,9 +1,31 @@
+import sys
+import platform
 import pandas as pd
 import sqlite3
 import os
-from sqlite3 import Error
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from elto import Ui_MainWindow
+
 
 cur = None
+get = ''
+
+class Elto(QtWidgets.QMainWindow):
+
+
+    def __init__(self):
+        super(Elto, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.OpenButton.clicked.connect(self.open_dialog)
+
+
+    def open_dialog(self):
+        global get
+        name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\Temp\\', "XLSX files (*.xls *.xlsx)")[0]
+        get = get.replace('', name)
+        get = get.replace('/', '\\')
 
 
 def connector (db_name):
@@ -28,6 +50,12 @@ def parser(xlsx_file):
     conn.close()
 
 
-def main():
-    parser("C:/Temp/Z_1C_(02052018-06052018)/Z_1C_(01052018).xlsx")
-main()
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = Elto()
+    window.show()
+    sys.exit(app.exec_())
+
+# def main():
+#     parser("C:/Temp/Z_1C_(02052018-06052018)/Z_1C_(01052018).xlsx")
+# main()

@@ -6,6 +6,7 @@ import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from elto import Ui_MainWindow
+import cx_Oracle
 
 
 cur = None
@@ -32,15 +33,20 @@ def connector (db_name):
     global cur
     conn = None
     try:
-        conn = sqlite3.connect(db_name)
-    except sqlite3.Error as error:
+        dsn_tns = cx_Oracle.makedsn(self.ui.ServerEdit.text(), '1521', service_name=self.ui.ServiceEdit.text())
+        conn = cx_Oracle.connect(user=self.ui.LoginEdit.text(), password=self.ui.PasswordEdit.text(), dsn=dsn_tns)
+    except cx_Oracle.Error as error:
         print("Соединение не установлено", error)
-    cur = conn.cursor()
-    return conn
+    # try:
+    #     conn = sqlite3.connect(db_name)
+    # except sqlite3.Error as error:
+    #     print("Соединение не установлено", error)
+    # cur = conn.cursor()
+    # return conn
 
 
 def parser(xlsx_file):
-    conn = connector('xlsdb.db')
+    #conn = connector('xlsdb.db')
     tabname = os.path.splitext(xlsx_file)[0]
     tabname=tabname.replace('(','')
     tabname = tabname.replace(')', '')

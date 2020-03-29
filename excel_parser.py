@@ -20,40 +20,47 @@ class Elto(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.OpenButton.clicked.connect(self.open_dialog)
+        self.ui.pushButton.clicked.connect(self.parser)
+
 
 
     def open_dialog(self):
         global get
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\Temp\\', "XLSX files (*.xls *.xlsx)")[0]
-        get = get.replace('', name)
-        get = get.replace('/', '\\')
+        get = open(name, 'r')
+    #     #get = get.replace('', name)
+    #     #get = get.replace('/', '\\')
+        with get:
+    #         data=get.read()
+            self.ui.pushButton.setEnabled(True)
 
 
-def connector (db_name):
-    global cur
-    conn = None
-    try:
-        dsn_tns = cx_Oracle.makedsn(self.ui.ServerEdit.text(), '1521', service_name=self.ui.ServiceEdit.text())
-        conn = cx_Oracle.connect(user=self.ui.LoginEdit.text(), password=self.ui.PasswordEdit.text(), dsn=dsn_tns)
-    except cx_Oracle.Error as error:
-        print("Соединение не установлено", error)
-    # try:
-    #     conn = sqlite3.connect(db_name)
-    # except sqlite3.Error as error:
-    #     print("Соединение не установлено", error)
-    # cur = conn.cursor()
-    # return conn
+
+    def connector (self):
+        global cur
+        conn = None
+        try:
+            dsn_tns = cx_Oracle.makedsn(self.ui.ServerEdit.text(), '1521', service_name=self.ui.ServiceEdit.text())
+            conn = cx_Oracle.connect(user=self.ui.LoginEdit.text(), password=self.ui.PasswordEdit.text(), dsn=dsn_tns)
+        except cx_Oracle.Error as error:
+            print("Соединение не установлено", error)
+        # try:
+        #     conn = sqlite3.connect(db_name)
+        # except sqlite3.Error as error:
+        #     print("Соединение не установлено", error)
+        # cur = conn.cursor()
+        # return conn
 
 
-def parser(xlsx_file):
-    #conn = connector('xlsdb.db')
-    tabname = os.path.splitext(xlsx_file)[0]
-    tabname=tabname.replace('(','')
-    tabname = tabname.replace(')', '')
-    raw_data= pd.read_excel(xlsx_file, sheet_name='Лист1')
-    raw_data.to_sql(name=tabname,con=conn,if_exists='replace')
-    conn.commit()
-    conn.close()
+    def parser(self, xlsx_file):
+        conn = self.connector()
+        tabname = os.path.splitext(xlsx_file)[0]
+        tabname=tabname.replace('(','')
+        tabname = tabname.replace(')', '')
+        raw_data= pd.read_excel(xlsx_file, sheet_name='Лист1')
+        raw_data.to_sql(name=tabname,con=conn,if_exists='replace')
+        conn.commit()
+        conn.close()
 
 
 if __name__ == "__main__":

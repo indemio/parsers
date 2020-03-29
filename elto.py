@@ -1,34 +1,37 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\Sedykhgi\Documents\GitHub\parsers\elto.ui'
+# Form implementation generated from reading ui file 'elto.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(204, 260)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        MainWindow.resize(230, 350)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMinimumSize(QtCore.QSize(204, 260))
-        MainWindow.setMaximumSize(QtCore.QSize(204, 260))
+        MainWindow.setMinimumSize(QtCore.QSize(230, 350))
+        MainWindow.setMaximumSize(QtCore.QSize(230, 350))
         MainWindow.setBaseSize(QtCore.QSize(400, 400))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("ebook.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(9, 9, 188, 228))
-        self.widget.setObjectName("widget")
-        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.widget)
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setObjectName("verticalLayout_4")
-        self.groupBox = QtWidgets.QGroupBox(self.widget)
+        self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox.setObjectName("groupBox")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
@@ -36,20 +39,23 @@ class Ui_MainWindow(object):
         self.ServerEdit.setObjectName("ServerEdit")
         self.verticalLayout_3.addWidget(self.ServerEdit)
         self.ServiceEdit = QtWidgets.QLineEdit(self.groupBox)
+        self.ServiceEdit.setEnabled(False)
         self.ServiceEdit.setObjectName("ServiceEdit")
         self.verticalLayout_3.addWidget(self.ServiceEdit)
         self.LoginEdit = QtWidgets.QLineEdit(self.groupBox)
+        self.LoginEdit.setEnabled(False)
         self.LoginEdit.setInputMask("")
         self.LoginEdit.setText("")
         self.LoginEdit.setObjectName("LoginEdit")
         self.verticalLayout_3.addWidget(self.LoginEdit)
         self.PasswordEdit = QtWidgets.QLineEdit(self.groupBox)
+        self.PasswordEdit.setEnabled(False)
         self.PasswordEdit.setInputMask("")
         self.PasswordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
         self.PasswordEdit.setObjectName("PasswordEdit")
         self.verticalLayout_3.addWidget(self.PasswordEdit)
         self.verticalLayout_4.addWidget(self.groupBox)
-        self.groupBox_2 = QtWidgets.QGroupBox(self.widget)
+        self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -64,8 +70,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.OpenButton = QtWidgets.QPushButton(self.groupBox_2)
         self.OpenButton.setObjectName("OpenButton")
+        self.OpenButton.setEnabled(False)
         self.horizontalLayout.addWidget(self.OpenButton)
         self.pushButton = QtWidgets.QPushButton(self.groupBox_2)
+        self.pushButton.setEnabled(False)
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -74,6 +82,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.pushButton_2)
         self.verticalLayout_2.addLayout(self.verticalLayout)
         self.verticalLayout_4.addWidget(self.groupBox_2)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -81,6 +90,10 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.pushButton_2.clicked.connect(MainWindow.close)
+        self.ServerEdit.textChanged.connect(lambda: self.ServiceEdit.setEnabled(True))
+        self.ServiceEdit.textChanged.connect(lambda: self.LoginEdit.setEnabled(True))
+        self.LoginEdit.textChanged.connect(lambda: self.PasswordEdit.setEnabled(True))
+        self.PasswordEdit.textChanged.connect(lambda: self.OpenButton.setEnabled(True))
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -95,4 +108,3 @@ class Ui_MainWindow(object):
         self.OpenButton.setText(_translate("MainWindow", "Выбрать Файл"))
         self.pushButton.setText(_translate("MainWindow", "Загрузить"))
         self.pushButton_2.setText(_translate("MainWindow", "Выход"))
-

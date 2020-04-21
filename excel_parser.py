@@ -5,7 +5,7 @@ import sqlite3
 import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
-from elto import Ui_MainWindow
+from elto2 import Ui_MainWindow
 import cx_Oracle
 
 
@@ -19,8 +19,8 @@ class Elto(QtWidgets.QMainWindow):
         super(Elto, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.OpenButton.clicked.connect(self.open_dialog)
-        self.ui.pushButton.clicked.connect(self.parser)
+        self.ui.fileButton.clicked.connect(self.open_dialog)
+        self.ui.runButton.clicked.connect(self.parser)
 
 
 
@@ -40,8 +40,8 @@ class Elto(QtWidgets.QMainWindow):
         global cur
         conn = None
         try:
-            dsn_tns = cx_Oracle.makedsn(self.ui.ServerEdit.text(), '1521', service_name=self.ui.ServiceEdit.text())
-            conn = cx_Oracle.connect(user=self.ui.LoginEdit.text(), password=self.ui.PasswordEdit.text(), dsn=dsn_tns)
+            dsn_tns = cx_Oracle.makedsn(self.ui.addrEdit.text(), '1521', service_name=self.ui.serviceEdit.text())
+            conn = cx_Oracle.connect(user=self.ui.loginEdit.text(), password=self.ui.passwordEdit.text(), dsn=dsn_tns)
         except cx_Oracle.Error as error:
             print("Соединение не установлено", error)
         # try:

@@ -5,12 +5,37 @@ import sqlite3
 import os
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from PyQt5.QtCore import QAbstractTableModel, Qt
 from elto2 import Ui_MainWindow
 import cx_Oracle
 
 
 cur = None
 get = ''
+
+
+class pandasModel(QAbstractTableModel):
+
+    def __init__(self, data):
+        QAbstractTableModel.__init__(self)
+        self._data = data
+
+    def rowCount(self, parent=None):
+        return self._data.shape[0]
+
+    def columnCount(self, parnet=None):
+        return self._data.shape[1]
+
+    def data(self, index, role=Qt.DisplayRole):
+        if index.isValid():
+            if role == Qt.DisplayRole:
+                return str(self._data.iloc[index.row(), index.column()])
+        return None
+
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return self._data.columns[col]
+        return None
 
 class Elto(QtWidgets.QMainWindow):
 
@@ -27,14 +52,22 @@ class Elto(QtWidgets.QMainWindow):
     def open_dialog(self):
         global get
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\Temp\\', "XLSX files (*.xls *.xlsx)")[0]
-        get = open(name, 'r')
-    #     #get = get.replace('', name)
-    #     #get = get.replace('/', '\\')
-        with get:
+        #get = open(name, 'r')
+        #get = get.replace('', name)
+        # get = get.replace('/', '\\')
+        #with name:
     #         data=get.read()
-            self.ui.pushButton.setEnabled(True)
-
-
+        if name !='':
+            self.ui.runButton.setEnabled(True)
+            self.ui.tabside.show()
+            sname="Лист1"
+            if self.ui.checkBox.isChecked() == True:
+                df = pd.read_excel(name, sheet_name=self.ui.listEdit.text())
+            else:
+                df=pd.read_excel(name, sheet_name=sname)
+            model = pandasModel(df)
+            self.ui.tableView.setModel(model)
+            self.ui.tableView.show()
 
     def connector (self):
         global cur

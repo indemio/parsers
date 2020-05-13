@@ -127,7 +127,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "ELTO"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "ELTO v0.01a"))
         self.groupBox.setTitle(_translate("MainWindow", "Авторизация"))
         self.addrEdit.setPlaceholderText(_translate("MainWindow", "Введите адрес сервера"))
         self.serviceEdit.setPlaceholderText(_translate("MainWindow", "Введите имя сервиса"))

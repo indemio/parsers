@@ -3,15 +3,18 @@ import platform
 import pandas as pd
 import sqlite3
 import os
+from sqlalchemy import types, create_engine, exc
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import QAbstractTableModel, Qt
 from elto2 import Ui_MainWindow
 import cx_Oracle
 
-
+os.environ['NLS_LANG'] = 'American_America.CL8MSWIN1251'
 cur = None
-get = ''
+#get = ''
+name = ''
+sname=''
 
 
 class pandasModel(QAbstractTableModel):
@@ -48,35 +51,59 @@ class Elto(QtWidgets.QMainWindow):
         self.ui.runButton.clicked.connect(self.parser)
 
 
+    def error_resolver(self, error, title):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setText(str(error))
+        msg.setWindowTitle(title)
+        return msg
+
+
+    def df_loader(self, name, sname):
+        try:
+            df = pd.read_excel(name, sheet_name=sname)
+            return df
+        except:
+            return None
 
     def open_dialog(self):
-        global get
+        global name
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', 'C:\\Temp\\', "XLSX files (*.xls *.xlsx)")[0]
-        #get = open(name, 'r')
-        #get = get.replace('', name)
-        # get = get.replace('/', '\\')
-        #with name:
-    #         data=get.read()
         if name !='':
-            self.ui.runButton.setEnabled(True)
-            self.ui.tabside.show()
+            self.table_viewer(name)
+
+
+    def table_viewer(self, name):
+        global sname
+        if self.ui.checkBox.isChecked() == True:
+            sname=self.ui.listEdit.text()
+        else:
             sname="Лист1"
-            if self.ui.checkBox.isChecked() == True:
-                df = pd.read_excel(name, sheet_name=self.ui.listEdit.text())
-            else:
-                df=pd.read_excel(name, sheet_name=sname)
-            model = pandasModel(df)
-            self.ui.tableView.setModel(model)
-            self.ui.tableView.show()
+        df =self.df_loader(name,sname)
+        if df is not None:
+            try:
+                model = pandasModel(df)
+                self.ui.tableView.setModel(model)
+                self.ui.tableView.show()
+                self.ui.runButton.setEnabled(True)
+                self.ui.tabside.show()
+            except:
+                pass
+        else:
+            msg=self.error_resolver("Имя загружаемого листа отличается от "+sname,"Ошибка")
+            msg.exec_()
+
 
     def connector (self):
         global cur
         conn = None
         try:
-            dsn_tns = cx_Oracle.makedsn(self.ui.addrEdit.text(), '1521', service_name=self.ui.serviceEdit.text())
-            conn = cx_Oracle.connect(user=self.ui.loginEdit.text(), password=self.ui.passwordEdit.text(), dsn=dsn_tns)
-        except cx_Oracle.Error as error:
-            print("Соединение не установлено", error)
+            conn = create_engine('oracle+cx_oracle://'+self.ui.loginEdit.text()+':'+self.ui.passwordEdit.text()+
+                                 '@'+self.ui.addrEdit.text()+':1521/?service_name='+self.ui.serviceEdit.text())
+            conn.execute('select sysdate from dual').fetchall()
+            return conn, None
+        except exc.DatabaseError as error:
+            return None, error
         # try:
         #     conn = sqlite3.connect(db_name)
         # except sqlite3.Error as error:
@@ -85,15 +112,35 @@ class Elto(QtWidgets.QMainWindow):
         # return conn
 
 
-    def parser(self, xlsx_file):
-        conn = self.connector()
-        tabname = os.path.splitext(xlsx_file)[0]
-        tabname=tabname.replace('(','')
-        tabname = tabname.replace(')', '')
-        raw_data= pd.read_excel(xlsx_file, sheet_name='Лист1')
-        raw_data.to_sql(name=tabname,con=conn,if_exists='replace')
-        conn.commit()
-        conn.close()
+    def parser(self):
+        global name
+        global sname
+        conn, error = self.connector()
+        if conn is not None:
+            try:
+                tabname = os.path.split(name)[1]
+                tabname = os.path.splitext(tabname)[0]
+                tabname = tabname.replace('(','')
+                tabname = tabname.replace(')', '')
+                df=pd.read_excel(name, sheet_name=sname)
+                dtyp = {c: types.VARCHAR(df[c].str.len().max())
+                        for c in df.columns[df.dtypes == 'object'].tolist()}
+                df.to_sql(name=tabname,con=conn,if_exists='replace',dtype=dtyp)
+                msg = QtWidgets.QMessageBox()
+                msg.setIcon(QtWidgets.QMessageBox.Information)
+                msg.setText('Запись выполнена успешно')
+                msg.setWindowTitle('Успех')
+                msg.exec_()
+            except exc.DatabaseError as error:
+                msg=self.error_resolver(error,"Запись не выполнена")
+                msg.exec_()
+                #pass
+        else:
+            msg=self.error_resolver(error,"Соединение не установлено")
+            msg.show()
+
+
+
 
 
 if __name__ == "__main__":
@@ -101,7 +148,3 @@ if __name__ == "__main__":
     window = Elto()
     window.show()
     sys.exit(app.exec_())
-
-# def main():
-#     parser("C:/Temp/Z_1C_(02052018-06052018)/Z_1C_(01052018).xlsx")
-# main()

@@ -7,7 +7,7 @@ from PyQt5.QtCore import QAbstractTableModel, Qt
 #                    'b': [100, 200, 300],
 #                    'c': ['a', 'b', 'c']})
 
-df=pd.read_excel("C:/Users/Sedykhgi/Documents/22042020.xlsx", sheet_name='kok-w94034')
+df=pd.read_excel("", sheet_name='k')
 
 class pandasModel(QAbstractTableModel):
 

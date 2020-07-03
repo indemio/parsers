@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QTableView
 from PyQt5.QtCore import QAbstractTableModel, Qt
 
 
-df=pd.read_excel("C:/Users/Sedykhgi/Documents/22042020.xlsx", sheet_name='kok-w94034')
+df=pd.read_excel("", sheet_name='')
 
 
 class TableModel(QtCore.QAbstractTableModel):

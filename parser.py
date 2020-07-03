@@ -13,8 +13,8 @@ def connector():
 
     conn = None
     try:
-        dsn_tns = cx_Oracle.makedsn('10.10.1.20', '1521', service_name='KGOK')
-        conn = cx_Oracle.connect(user=r'excel', password='q1w2e3', dsn=dsn_tns)
+        dsn_tns = cx_Oracle.makedsn('', '1521', service_name='')
+        conn = cx_Oracle.connect(user=r'', password='', dsn=dsn_tns)
         
     except cx_Oracle.Error as error:
         print("Соединение не установлено", error)
